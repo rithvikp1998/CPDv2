@@ -1,4 +1,4 @@
-QT       += widgets
+QT       += core gui widgets
 
 TARGET = common-print-dialog
 TEMPLATE = lib
@@ -13,6 +13,11 @@ HEADERS += \
         src/common-print-dialog_global.h
 
 unix {
-    target.path = /usr/lib
-    INSTALLS += target
+    target.path = /usr/local
+    headerfiles.path = /usr/local/include/common-print-dialog
+    headerfiles.files = $$PWD/src/*.h
+    INSTALLS += target headerfiles
 }
+
+FORMS += \
+    src/qcommonprintdialog.ui

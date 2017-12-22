@@ -1,13 +1,24 @@
 #ifndef QCOMMONPRINTDIALOG_H
 #define QCOMMONPRINTDIALOG_H
 
+#include <QMainWindow>
+
 #include "common-print-dialog_global.h"
 
-class COMMONPRINTDIALOGSHARED_EXPORT QCommonPrintDialog
+namespace Ui {
+    class QCommonPrintDialog;
+}
+
+class QCommonPrintDialog : public QMainWindow
 {
+    Q_OBJECT
 
 public:
-    QCommonPrintDialog();
+    explicit QCommonPrintDialog(QWidget *parent = 0);
+    ~QCommonPrintDialog();
+
+private:
+    Ui::QCommonPrintDialog *ui;
 };
 
 #endif // QCOMMONPRINTDIALOG_H
