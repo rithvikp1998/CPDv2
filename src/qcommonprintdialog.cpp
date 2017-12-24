@@ -6,9 +6,10 @@
 QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     QDialog (parent)
 {
-    resize(640, 480);
+    resize(720, 480);
 
     tabWidget = new QTabWidget;
+
     tabWidget->addTab(new GeneralTab(parent), tr("General"));
     tabWidget->addTab(new PageSetupTab(parent), tr("Page Setup"));
     tabWidget->addTab(new OptionsTab(parent), tr("Options"));
@@ -16,9 +17,30 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
 
     QPrintPreviewWidget *preview = new QPrintPreviewWidget;
 
+    QPushButton *printButton = new QPushButton(tr("Print"));
+    QPushButton *cancelButton = new QPushButton(tr("Cancel"));
+    QHBoxLayout *buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(printButton);
+    buttonLayout->addWidget(cancelButton);
+
+    QVBoxLayout *leftLayout = new QVBoxLayout;
+    leftLayout->addWidget(tabWidget);
+    leftLayout->addItem(buttonLayout);
+
+    QSpinBox *zoomSpinBox = new QSpinBox;
+    zoomSpinBox->setRange(100,200);
+    zoomSpinBox->setSuffix("%");
+    QHBoxLayout *zoomSliderLayout = new QHBoxLayout;
+    zoomSliderLayout->addWidget(new QLabel(tr("Zoom")));
+    zoomSliderLayout->addWidget(zoomSpinBox);
+
+    QVBoxLayout *rightLayout = new QVBoxLayout;
+    rightLayout->addWidget(preview);
+    rightLayout->addItem(zoomSliderLayout);
+
     QHBoxLayout *layout = new QHBoxLayout;
-    layout->addWidget(tabWidget);
-    layout->addWidget(preview);
+    layout->addItem(leftLayout);
+    layout->addItem(rightLayout);
     setLayout(layout);
 }
 
@@ -32,6 +54,7 @@ GeneralTab::GeneralTab(QWidget *parent)
     QComboBox *paperComboBox = new QComboBox;
     QComboBox *pagesComboBox = new QComboBox;
     QSpinBox *copiesSpinBox = new QSpinBox;
+    copiesSpinBox->setMinimum(1);
     QCheckBox *collateCheckBox = new QCheckBox;
 
     QGroupBox *orientationGroupBox = new QGroupBox;
@@ -40,13 +63,13 @@ GeneralTab::GeneralTab(QWidget *parent)
     QHBoxLayout *orientationGroupBoxLayout = new QHBoxLayout;
     orientationGroupBoxLayout->addWidget(portraitButton);
     orientationGroupBoxLayout->addWidget(landscapeButton);
+    portraitButton->setChecked(true);
     orientationGroupBox->setLayout(orientationGroupBoxLayout);
 
     QFormLayout *layout = new QFormLayout;
-    layout->setLabelAlignment(Qt::AlignLeft);
 
     layout->addRow(new QLabel(tr("Destination")), destinationComboBox);
-    layout->addRow(new QLabel(tr("Show Remote Printers")), remotePrintersCheckBox);
+    layout->addRow(new QLabel(tr("Remote Printers")), remotePrintersCheckBox);
     layout->addRow(new QLabel(tr("Paper")), paperComboBox);
     layout->addRow(new QLabel(tr("Pages")), pagesComboBox);
     layout->addRow(new QLabel(tr("Copies")), copiesSpinBox);
@@ -62,10 +85,12 @@ PageSetupTab::PageSetupTab(QWidget *parent)
     QComboBox *pagesPerSideComboBox = new QComboBox;
     QComboBox *onlyPrintComboBox = new QComboBox;
     QSpinBox *scaleSpinBox = new QSpinBox;
+    scaleSpinBox->setRange(0, 200);
+    scaleSpinBox->setValue(100);
+    scaleSpinBox->setSuffix("%");
     QComboBox *paperSourceComboBox = new QComboBox;
 
     QFormLayout *layout = new QFormLayout;
-    layout->setLabelAlignment(Qt::AlignLeft);
 
     layout->addRow(new QLabel(tr("Layout")));
     layout->addRow(new QLabel(tr("Print Both Sides")), bothSidesCheckBox);
@@ -89,7 +114,6 @@ OptionsTab::OptionsTab(QWidget *parent)
     QComboBox *resolutionComboBox = new QComboBox;
 
     QFormLayout *layout = new QFormLayout;
-    layout->setLabelAlignment(Qt::AlignLeft);
 
     layout->addRow((new QLabel(tr("Margin"))));
     layout->addRow(new QLabel(tr("Top")), marginTopValue);
