@@ -2,14 +2,51 @@
 #define QCOMMONPRINTDIALOG_H
 
 #include <QMainWindow>
+#include <QDialog>
 
 #include "common-print-dialog_global.h"
 
-namespace Ui {
-    class QCommonPrintDialog;
-}
+class GeneralTab : public QWidget
+{
+    Q_OBJECT
 
-class QCommonPrintDialog : public QMainWindow
+public:
+    explicit GeneralTab(QWidget *parent = 0);
+};
+
+class PageSetupTab : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit PageSetupTab(QWidget *parent = 0);
+};
+
+class OptionsTab : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit OptionsTab(QWidget *parent = 0);
+};
+
+class JobsTab : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit JobsTab(QWidget *parent = 0);
+};
+
+class QualityTab : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit QualityTab(QWidget *parent = 0);
+};
+
+class QCommonPrintDialog : public QDialog
 {
     Q_OBJECT
 
@@ -18,7 +55,7 @@ public:
     ~QCommonPrintDialog();
 
 private:
-    Ui::QCommonPrintDialog *ui;
+    QTabWidget *tabWidget;
 };
 
 #endif // QCOMMONPRINTDIALOG_H

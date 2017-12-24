@@ -1,14 +1,77 @@
+#include <QtWidgets>
+#include <QPrintPreviewWidget>
+
 #include "qcommonprintdialog.h"
-#include "ui_qcommonprintdialog.h"
 
 QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
-    QMainWindow (parent),
-    ui(new Ui::QCommonPrintDialog)
+    QDialog (parent)
 {
-    ui->setupUi(this);
+    resize(640, 480);
+
+    tabWidget = new QTabWidget;
+    tabWidget->addTab(new GeneralTab(parent), tr("General"));
+    tabWidget->addTab(new PageSetupTab(parent), tr("Page Setup"));
+    tabWidget->addTab(new OptionsTab(parent), tr("Options"));
+    tabWidget->addTab(new JobsTab(parent), tr("Jobs"));
+
+    QPrintPreviewWidget *preview = new QPrintPreviewWidget;
+
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->addWidget(tabWidget);
+    layout->addWidget(preview);
+    setLayout(layout);
 }
 
-QCommonPrintDialog::~QCommonPrintDialog()
+QCommonPrintDialog::~QCommonPrintDialog() = default;
+
+GeneralTab::GeneralTab(QWidget *parent)
+    : QWidget(parent)
 {
-    delete ui;
+
+}
+
+PageSetupTab::PageSetupTab(QWidget *parent)
+{
+
+}
+
+OptionsTab::OptionsTab(QWidget *parent)
+{
+    QLineEdit *marginTopValue = new QLineEdit;
+    QLineEdit *marginBottomValue = new QLineEdit;
+    QLineEdit *marginLeftValue = new QLineEdit;
+    QLineEdit *marginRightValue = new QLineEdit;
+    QComboBox *resolutionComboBox = new QComboBox;
+
+    QFormLayout *layout = new QFormLayout;
+    layout->setLabelAlignment(Qt::AlignLeft);
+
+    layout->addRow((new QLabel(tr("Margin"))));
+    layout->addRow(new QLabel(tr("Top")), marginTopValue);
+    layout->addRow(new QLabel(tr("Bottom")), marginBottomValue);
+    layout->addRow(new QLabel(tr("Left")), marginLeftValue);
+    layout->addRow(new QLabel(tr("Right")), marginRightValue);
+    layout->addRow(new QLabel(tr("")));
+    layout->addRow(new QLabel(tr("Resolution")), resolutionComboBox);
+
+    setLayout(layout);
+}
+
+JobsTab::JobsTab(QWidget *parent)
+{
+    QWidget *jobsWidget = new QWidget;
+    QGridLayout *jobsLayout = new QGridLayout;
+
+    jobsLayout->addWidget(new QLabel(tr("Printer")), 1, 1);
+    jobsLayout->addWidget(new QLabel(tr("Location")), 1, 2);
+    jobsLayout->addWidget(new QLabel(tr("Status")), 1, 3);
+    jobsWidget->setLayout(jobsLayout);
+
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidget(jobsWidget);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(scrollArea);
+    setLayout(layout);
+
 }

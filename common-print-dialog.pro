@@ -1,4 +1,4 @@
-QT       += core gui widgets
+QT       += core gui widgets printsupport
 
 TARGET = common-print-dialog
 TEMPLATE = lib
