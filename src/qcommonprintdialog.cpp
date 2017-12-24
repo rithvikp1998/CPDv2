@@ -27,7 +27,33 @@ QCommonPrintDialog::~QCommonPrintDialog() = default;
 GeneralTab::GeneralTab(QWidget *parent)
     : QWidget(parent)
 {
+    QComboBox *destinationComboBox = new QComboBox;
+    QCheckBox *remotePrintersCheckBox = new QCheckBox;
+    QComboBox *paperComboBox = new QComboBox;
+    QComboBox *pagesComboBox = new QComboBox;
+    QSpinBox *copiesSpinBox = new QSpinBox;
+    QCheckBox *collateCheckBox = new QCheckBox;
 
+    QGroupBox *orientationGroupBox = new QGroupBox;
+    QRadioButton *portraitButton = new QRadioButton(tr("Portrait"));
+    QRadioButton *landscapeButton = new QRadioButton(tr("Landscape"));
+    QHBoxLayout *orientationGroupBoxLayout = new QHBoxLayout;
+    orientationGroupBoxLayout->addWidget(portraitButton);
+    orientationGroupBoxLayout->addWidget(landscapeButton);
+    orientationGroupBox->setLayout(orientationGroupBoxLayout);
+
+    QFormLayout *layout = new QFormLayout;
+    layout->setLabelAlignment(Qt::AlignLeft);
+
+    layout->addRow(new QLabel(tr("Destination")), destinationComboBox);
+    layout->addRow(new QLabel(tr("Show Remote Printers")), remotePrintersCheckBox);
+    layout->addRow(new QLabel(tr("Paper")), paperComboBox);
+    layout->addRow(new QLabel(tr("Pages")), pagesComboBox);
+    layout->addRow(new QLabel(tr("Copies")), copiesSpinBox);
+    layout->addRow(new QLabel(tr("Collate Pages")), collateCheckBox);
+    layout->addRow(new QLabel(tr("Orientation")), orientationGroupBox);
+
+    setLayout(layout);
 }
 
 PageSetupTab::PageSetupTab(QWidget *parent)
