@@ -5,6 +5,9 @@
 #include <QDialog>
 
 #include "common-print-dialog_global.h"
+#include "singleton.h"
+
+#include <cpdb-libs-frontend.h>
 
 class GeneralTab : public QWidget
 {
@@ -38,12 +41,18 @@ public:
     explicit JobsTab(QWidget *parent = 0);
 };
 
-class QualityTab : public QWidget
+class CallbackFunctions : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit QualityTab(QWidget *parent = 0);
+    explicit CallbackFunctions(QObject *parent = 0);
+    static void add_printer_callback(PrinterObj *p);
+    static void remove_printer_callback(PrinterObj *p);
+
+Q_SIGNALS:
+    void addPrinterSignal(char *printer_name, char *printer_id, char *backend_name);
+    void removePrinterSignal(char *printer_name);
+
 };
 
 class QCommonPrintDialog : public QDialog
@@ -53,9 +62,19 @@ class QCommonPrintDialog : public QDialog
 public:
     explicit QCommonPrintDialog(QWidget *parent = 0);
     ~QCommonPrintDialog();
+    void init_backend();
+
+private Q_SLOTS:
+    void addPrinter(char *printer_name, char *printer_id, char *backend_name);
+    void removePrinter(char *printer_name);
 
 private:
     QTabWidget *tabWidget;
+    FrontendObj *f;
+    PrinterObj *p;
+    QString uniqueID;
 };
+
+typedef Singleton<CallbackFunctions> cbf;
 
 #endif // QCOMMONPRINTDIALOG_H

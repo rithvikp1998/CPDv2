@@ -3,6 +3,10 @@
 
 #include "qcommonprintdialog.h"
 
+extern "C" {
+#include <cpdb-libs-frontend.h>
+}
+
 QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     QDialog (parent)
 {
@@ -43,9 +47,56 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     layout->addItem(leftLayout);
     layout->addItem(rightLayout);
     setLayout(layout);
+
+    QObject::connect(cbf::Instance(),
+                     SIGNAL(addPrinterSignal(char *, char *, char *)),
+                     this,
+                     SLOT(addPrinter(char *, char *, char *)));
+
+    QObject::connect(cbf::Instance(),
+                     SIGNAL(removePrinterSignal(char *)),
+                     this,
+                     SLOT(removePrinter(char *)));
+
+    init_backend();
 }
 
 QCommonPrintDialog::~QCommonPrintDialog() = default;
+
+void QCommonPrintDialog::init_backend()
+{
+    event_callback add_cb = (event_callback)CallbackFunctions::add_printer_callback;
+    event_callback rem_cb = (event_callback)CallbackFunctions::remove_printer_callback;
+
+    uniqueID = QUuid::createUuid().toString().remove('{').remove('}');
+    f = get_new_FrontendObj(uniqueID.toLatin1().data(), add_cb, rem_cb);
+    connect_to_dbus(f);
+}
+
+CallbackFunctions::CallbackFunctions(QObject *parent):
+    QObject (parent)
+{
+}
+
+void CallbackFunctions::add_printer_callback(PrinterObj *p)
+{
+    cbf::Instance()->addPrinterSignal(p->name, p->id, p->backend_name);
+}
+
+void CallbackFunctions::remove_printer_callback(PrinterObj *p)
+{
+    cbf::Instance()->removePrinterSignal(p->name);
+}
+
+void QCommonPrintDialog::addPrinter(char *printer_name, char *printer_id, char *backend_name)
+{
+    qDebug("Add printer %s", printer_name);
+}
+
+void QCommonPrintDialog::removePrinter(char *printer_name)
+{
+    qDebug("Remove Printer %s", printer_name);
+}
 
 GeneralTab::GeneralTab(QWidget *parent)
     : QWidget(parent)
