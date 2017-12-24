@@ -32,7 +32,26 @@ GeneralTab::GeneralTab(QWidget *parent)
 
 PageSetupTab::PageSetupTab(QWidget *parent)
 {
+    QCheckBox *bothSidesCheckBox = new QCheckBox;
+    QComboBox *pagesPerSideComboBox = new QComboBox;
+    QComboBox *onlyPrintComboBox = new QComboBox;
+    QSpinBox *scaleSpinBox = new QSpinBox;
+    QComboBox *paperSourceComboBox = new QComboBox;
 
+    QFormLayout *layout = new QFormLayout;
+    layout->setLabelAlignment(Qt::AlignLeft);
+
+    layout->addRow(new QLabel(tr("Layout")));
+    layout->addRow(new QLabel(tr("Print Both Sides")), bothSidesCheckBox);
+    layout->addRow(new QLabel(tr("Pages Per Side")), pagesPerSideComboBox);
+    layout->addRow(new QLabel(tr("Only Print")), onlyPrintComboBox);
+    layout->addRow(new QLabel(tr("Scale")), scaleSpinBox);
+    layout->addRow(new QLabel(tr("")));
+
+    layout->addRow(new QLabel(tr("Paper")));
+    layout->addRow(new QLabel(tr("Paper Source")), paperSourceComboBox);
+
+    setLayout(layout);
 }
 
 OptionsTab::OptionsTab(QWidget *parent)
