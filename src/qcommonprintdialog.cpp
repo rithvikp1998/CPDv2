@@ -18,6 +18,7 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     QPrintPreviewWidget *preview = new QPrintPreviewWidget;
 
     QPushButton *printButton = new QPushButton(tr("Print"));
+    printButton->setDefault(true);
     QPushButton *cancelButton = new QPushButton(tr("Cancel"));
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     buttonLayout->addWidget(printButton);
@@ -139,8 +140,15 @@ JobsTab::JobsTab(QWidget *parent)
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidget(jobsWidget);
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(scrollArea);
-    setLayout(layout);
+    QPushButton *refreshButton = new QPushButton("Refresh");
+    QComboBox *startJobComboBox = new QComboBox;
+    QPushButton *saveJobButton = new QPushButton("Save");
 
+    QFormLayout *layout = new QFormLayout;
+    layout->addRow(scrollArea);
+    layout->addRow(new QLabel(tr("Refresh")), refreshButton);
+    layout->addRow(new QLabel(tr("Start Job")), startJobComboBox);
+    layout->addRow(new QLabel(tr("Save Job")), saveJobButton);
+
+    setLayout(layout);
 }
