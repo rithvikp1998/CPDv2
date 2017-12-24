@@ -18,6 +18,3 @@ unix {
     headerfiles.files = $$PWD/src/*.h
     INSTALLS += target headerfiles
 }
-
-FORMS += \
-    src/qcommonprintdialog.ui
