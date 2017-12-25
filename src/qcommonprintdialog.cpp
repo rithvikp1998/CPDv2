@@ -218,7 +218,12 @@ void QCommonPrintDialog::newPrinterSelected(int index)
                     optionsTab->resolutionComboBox->setCurrentIndex(optionsTab->resolutionComboBox->count() - 1);
             }
         } else if (strncmp(key, "sides", 5) == 0) {
-            qDebug("sides");
+            pageSetupTab->bothSidesComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                pageSetupTab->bothSidesComboBox->addItem(value->supported_values[i]);
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    pageSetupTab->bothSidesComboBox->setCurrentIndex(pageSetupTab->bothSidesComboBox->count() - 1);
+            }
         } else {
             qDebug() << "Unhandled Option:" << key;
         }
@@ -275,7 +280,7 @@ GeneralTab::GeneralTab(QWidget *parent)
 
 PageSetupTab::PageSetupTab(QWidget *parent)
 {
-    bothSidesCheckBox = new QCheckBox;
+    bothSidesComboBox = new QComboBox;
     pagesPerSideComboBox = new QComboBox;
     onlyPrintComboBox = new QComboBox;
     scaleSpinBox = new QSpinBox;
@@ -287,7 +292,7 @@ PageSetupTab::PageSetupTab(QWidget *parent)
     QFormLayout *layout = new QFormLayout;
 
     layout->addRow(new QLabel(tr("Layout")));
-    layout->addRow(new QLabel(tr("Print Both Sides")), bothSidesCheckBox);
+    layout->addRow(new QLabel(tr("Print Both Sides")), bothSidesComboBox);
     layout->addRow(new QLabel(tr("Pages Per Side")), pagesPerSideComboBox);
     layout->addRow(new QLabel(tr("Only Print")), onlyPrintComboBox);
     layout->addRow(new QLabel(tr("Scale")), scaleSpinBox);

@@ -36,7 +36,7 @@ class PageSetupTab : public QWidget
     Q_OBJECT
 
 public:
-    QCheckBox *bothSidesCheckBox;
+    QComboBox *bothSidesComboBox;
     QComboBox *pagesPerSideComboBox;
     QComboBox *onlyPrintComboBox;
     QSpinBox *scaleSpinBox;
