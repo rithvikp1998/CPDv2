@@ -18,7 +18,12 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     QCommonPrintDialog *dialog = new QCommonPrintDialog();
-    dialog->show();
+    if(dialog->exec() == QDialog::Rejected){
+        qDebug("Printing cancelled");
+        return;
+    }
+
+    qDebug("Printing successful");
 
     return;
 }

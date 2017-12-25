@@ -12,7 +12,7 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
 {
     resize(720, 480);
 
-    destinationList = new QStringList;
+    QStringList destinationList;
 
     tabWidget = new QTabWidget;
 
@@ -26,7 +26,7 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     tabWidget->addTab(optionsTab, tr("Options"));
     tabWidget->addTab(jobsTab, tr("Jobs"));
 
-    QPrintPreviewWidget *preview = new QPrintPreviewWidget(parent);
+    preview = new QPrintPreviewWidget(parent);
 
     QPushButton *printButton = new QPushButton(tr("Print"));
     printButton->setDefault(true);
@@ -64,10 +64,31 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      SIGNAL(removePrinterSignal(char *, char *, char *)),
                      this,
                      SLOT(removePrinter(char *, char *, char *)));
+
+    QObject::connect(cancelButton,
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(quit()));
+
+    QObject::connect(generalTab->destinationComboBox,
+                     SIGNAL(currentIndexChanged(int)),
+                     this,
+                     SLOT(newPrinterSelected(int)));
+
     QObject::connect(generalTab->remotePrintersCheckBox,
                      SIGNAL(stateChanged(int)),
                      this,
                      SLOT(remotePrintersCheckBoxStateChanged(int)));
+
+    QObject::connect(generalTab->collateCheckBox,
+                     SIGNAL(stateChanged(int)),
+                     this,
+                     SLOT(collateCheckBoxStateChanged(int)));
+
+    QObject::connect(generalTab->orientationButtonGroup,
+                     SIGNAL(buttonClicked(int)),
+                     this,
+                     SLOT(orientationChanged(int)));
 
     init_backend();
 }
@@ -102,20 +123,104 @@ void CallbackFunctions::remove_printer_callback(PrinterObj *p)
 void QCommonPrintDialog::addPrinter(char *printer_name, char *printer_id, char *backend_name)
 {
     qDebug("Add printer %s, %s, %s", printer_name, printer_id, backend_name);
-    destinationList->append(QString("%1#%2").arg(printer_id).arg(backend_name));
+    destinationList.append(QString("%1#%2").arg(printer_id).arg(backend_name));
     generalTab->destinationComboBox->addItem(printer_name);
 }
 
 void QCommonPrintDialog::removePrinter(char *printer_name, char *printer_id, char *backend_name)
 {
-    int i = destinationList->indexOf(QString("%1#%2").arg(printer_id).arg(backend_name));
-    destinationList->removeAt(i);
+    int i = destinationList.indexOf(QString("%1#%2").arg(printer_id).arg(backend_name));
+    destinationList.removeAt(i);
     generalTab->destinationComboBox->removeItem(i);
+}
+
+void QCommonPrintDialog::quit()
+{
+    disconnect_from_dbus(f);
+    reject();
 }
 
 void QCommonPrintDialog::remotePrintersCheckBoxStateChanged(int state)
 {
     state == Qt::Checked ? unhide_remote_cups_printers(f) : hide_remote_cups_printers(f);
+}
+
+void QCommonPrintDialog::newPrinterSelected(int index)
+{
+    QString printer = destinationList[index];
+    QStringList list = printer.split('#');  // printer is in the format: <printer_id>#<backend_name>
+    p = find_PrinterObj(f, list[0].toLatin1().data(), list[1].toLatin1().data());
+
+    Options *options = get_all_options(p);
+
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, options->table);
+    gpointer _key, _value;
+
+    while (g_hash_table_iter_next(&iter, &_key, &_value)) {
+        char *key = static_cast<char *>(_key);
+        Option *value = static_cast<Option *>(_value);
+        if (strncmp(key, "copies", 6) == 0) {
+            QString copies(value->supported_values[0]);
+            QStringList numCopies = copies.split("-"); // copies is in format 1-9999
+            generalTab->copiesSpinBox->setRange(numCopies[0].toInt(), numCopies[1].toInt());
+            generalTab->copiesSpinBox->setValue(numCopies[0].toInt());
+        } else if (strncmp(key, "finishings", 10) == 0) {
+
+        } else if (strncmp(key, "ipp-attribute-fidelity", 22) == 0) {
+
+        } else if (strncmp(key, "job-hold-until", 14) == 0) {
+            qDebug("Job-hold-until");
+        } else if (strncmp(key, "job-name", 8) == 0) {
+
+        } else if (strncmp(key, "job-priority", 12) == 0) {
+
+        } else if (strncmp(key, "job-sheets", 10) == 0) {
+
+        } else if (strncmp(key, "media-col", 9) == 0) {
+
+        } else if (strncmp(key, "media", 5) == 0) {
+            generalTab->paperComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                generalTab->paperComboBox->addItem(pwg_to_readable(value->supported_values[i]));
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    generalTab->paperComboBox->setCurrentIndex(generalTab->paperComboBox->count() - 1);
+            }
+        } else if (strncmp(key, "multiple-document-handling", 26) == 0) {
+
+        } else if (strncmp(key, "number-up", 9) == 0) {
+            qDebug("number-up");
+        } else if (strncmp(key, "output-bin", 10) == 0) {
+
+        } else if (strncmp(key, "orientation-requested", 21) == 0) {
+
+        } else if (strncmp(key, "page-ranges", 11) == 0) {
+
+        } else if (strncmp(key, "print-color-mode", 16) == 0) {
+
+        } else if (strncmp(key, "print-quality", 13) == 0) {
+
+        } else if (strncmp(key, "printer-resolution", 18) == 0) {
+            qDebug("resolution");
+        } else if (strncmp(key, "sides", 5) == 0) {
+            qDebug("sides");
+        } else {
+            qDebug() << "Unhandled Option:" << key;
+        }
+    }
+}
+
+void QCommonPrintDialog::collateCheckBoxStateChanged(int state)
+{
+    qDebug("Collate CheckBox state changed");
+}
+
+void QCommonPrintDialog::orientationChanged(int buttonId)
+{
+    qDebug("%d", buttonId);
+    QString orientation = buttonId == 1 ? "portrait" : "landscape";
+    add_setting_to_printer(p, QString("orientation-requested").toLatin1().data(),
+                           orientation.toLatin1().data());
 }
 
 GeneralTab::GeneralTab(QWidget *parent)
@@ -126,17 +231,19 @@ GeneralTab::GeneralTab(QWidget *parent)
     paperComboBox = new QComboBox;
     pagesComboBox = new QComboBox;
     copiesSpinBox = new QSpinBox;
-    copiesSpinBox->setMinimum(1);
     collateCheckBox = new QCheckBox;
 
-    QGroupBox *orientationGroupBox = new QGroupBox;
+    pagesComboBox->addItem("All");
+
+    orientationButtonGroup = new QButtonGroup;
     QRadioButton *portraitButton = new QRadioButton(tr("Portrait"));
     QRadioButton *landscapeButton = new QRadioButton(tr("Landscape"));
-    QHBoxLayout *orientationGroupBoxLayout = new QHBoxLayout;
-    orientationGroupBoxLayout->addWidget(portraitButton);
-    orientationGroupBoxLayout->addWidget(landscapeButton);
+    orientationButtonGroup->addButton(portraitButton, 1);
+    orientationButtonGroup->addButton(landscapeButton, 2);
+    QHBoxLayout *orientationButtonsLayout = new QHBoxLayout;
+    orientationButtonsLayout->addWidget(portraitButton);
+    orientationButtonsLayout->addWidget(landscapeButton);
     portraitButton->setChecked(true);
-    orientationGroupBox->setLayout(orientationGroupBoxLayout);
 
     QFormLayout *layout = new QFormLayout;
 
@@ -146,7 +253,7 @@ GeneralTab::GeneralTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Pages")), pagesComboBox);
     layout->addRow(new QLabel(tr("Copies")), copiesSpinBox);
     layout->addRow(new QLabel(tr("Collate Pages")), collateCheckBox);
-    layout->addRow(new QLabel(tr("Orientation")), orientationGroupBox);
+    layout->addRow(new QLabel(tr("Orientation")), orientationButtonsLayout);
 
     setLayout(layout);
 }

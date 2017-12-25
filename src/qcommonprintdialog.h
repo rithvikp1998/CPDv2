@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDialog>
 #include <QtWidgets>
+#include <QPrintPreviewWidget>
 
 #include "common-print-dialog_global.h"
 #include "singleton.h"
@@ -25,6 +26,7 @@ public:
     QComboBox *pagesComboBox;
     QSpinBox *copiesSpinBox;
     QCheckBox *collateCheckBox;
+    QButtonGroup *orientationButtonGroup;
 
     explicit GeneralTab(QWidget *parent = 0);
 };
@@ -72,7 +74,7 @@ class QCommonPrintDialog : public QDialog
     Q_OBJECT
 
 public:
-    QStringList *destinationList;
+    QStringList destinationList;
 
     explicit QCommonPrintDialog(QWidget *parent = 0);
     ~QCommonPrintDialog();
@@ -81,7 +83,11 @@ public:
 private Q_SLOTS:
     void addPrinter(char *printer_name, char *printer_id, char *backend_name);
     void removePrinter(char *printer_name, char *printer_id, char *backend_name);
+    void quit();
+    void newPrinterSelected(int);
     void remotePrintersCheckBoxStateChanged(int state);
+    void collateCheckBoxStateChanged(int state);
+    void orientationChanged(int buttonId);
 
 private:
     GeneralTab *generalTab;
@@ -89,6 +95,7 @@ private:
     OptionsTab *optionsTab;
     JobsTab *jobsTab;
     QTabWidget *tabWidget;
+    QPrintPreviewWidget *preview;
     FrontendObj *f;
     PrinterObj *p;
     QString uniqueID;
