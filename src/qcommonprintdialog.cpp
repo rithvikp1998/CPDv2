@@ -12,14 +12,21 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
 {
     resize(720, 480);
 
+    destinationList = new QStringList;
+
     tabWidget = new QTabWidget;
 
-    tabWidget->addTab(new GeneralTab(parent), tr("General"));
-    tabWidget->addTab(new PageSetupTab(parent), tr("Page Setup"));
-    tabWidget->addTab(new OptionsTab(parent), tr("Options"));
-    tabWidget->addTab(new JobsTab(parent), tr("Jobs"));
+    generalTab = new GeneralTab(parent);
+    pageSetupTab = new PageSetupTab(parent);
+    optionsTab = new OptionsTab(parent);
+    jobsTab = new JobsTab(parent);
 
-    QPrintPreviewWidget *preview = new QPrintPreviewWidget;
+    tabWidget->addTab(generalTab, tr("General"));
+    tabWidget->addTab(pageSetupTab, tr("Page Setup"));
+    tabWidget->addTab(optionsTab, tr("Options"));
+    tabWidget->addTab(jobsTab, tr("Jobs"));
+
+    QPrintPreviewWidget *preview = new QPrintPreviewWidget(parent);
 
     QPushButton *printButton = new QPushButton(tr("Print"));
     printButton->setDefault(true);
@@ -54,9 +61,13 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      SLOT(addPrinter(char *, char *, char *)));
 
     QObject::connect(cbf::Instance(),
-                     SIGNAL(removePrinterSignal(char *)),
+                     SIGNAL(removePrinterSignal(char *, char *, char *)),
                      this,
-                     SLOT(removePrinter(char *)));
+                     SLOT(removePrinter(char *, char *, char *)));
+    QObject::connect(generalTab->remotePrintersCheckBox,
+                     SIGNAL(stateChanged(int)),
+                     this,
+                     SLOT(remotePrintersCheckBoxStateChanged(int)));
 
     init_backend();
 }
@@ -85,29 +96,38 @@ void CallbackFunctions::add_printer_callback(PrinterObj *p)
 
 void CallbackFunctions::remove_printer_callback(PrinterObj *p)
 {
-    cbf::Instance()->removePrinterSignal(p->name);
+    cbf::Instance()->removePrinterSignal(p->name, p->id, p->backend_name);
 }
 
 void QCommonPrintDialog::addPrinter(char *printer_name, char *printer_id, char *backend_name)
 {
-    qDebug("Add printer %s", printer_name);
+    qDebug("Add printer %s, %s, %s", printer_name, printer_id, backend_name);
+    destinationList->append(QString("%1#%2").arg(printer_id).arg(backend_name));
+    generalTab->destinationComboBox->addItem(printer_name);
 }
 
-void QCommonPrintDialog::removePrinter(char *printer_name)
+void QCommonPrintDialog::removePrinter(char *printer_name, char *printer_id, char *backend_name)
 {
-    qDebug("Remove Printer %s", printer_name);
+    int i = destinationList->indexOf(QString("%1#%2").arg(printer_id).arg(backend_name));
+    destinationList->removeAt(i);
+    generalTab->destinationComboBox->removeItem(i);
+}
+
+void QCommonPrintDialog::remotePrintersCheckBoxStateChanged(int state)
+{
+    state == Qt::Checked ? unhide_remote_cups_printers(f) : hide_remote_cups_printers(f);
 }
 
 GeneralTab::GeneralTab(QWidget *parent)
     : QWidget(parent)
 {
-    QComboBox *destinationComboBox = new QComboBox;
-    QCheckBox *remotePrintersCheckBox = new QCheckBox;
-    QComboBox *paperComboBox = new QComboBox;
-    QComboBox *pagesComboBox = new QComboBox;
-    QSpinBox *copiesSpinBox = new QSpinBox;
+    destinationComboBox = new QComboBox;
+    remotePrintersCheckBox = new QCheckBox;
+    paperComboBox = new QComboBox;
+    pagesComboBox = new QComboBox;
+    copiesSpinBox = new QSpinBox;
     copiesSpinBox->setMinimum(1);
-    QCheckBox *collateCheckBox = new QCheckBox;
+    collateCheckBox = new QCheckBox;
 
     QGroupBox *orientationGroupBox = new QGroupBox;
     QRadioButton *portraitButton = new QRadioButton(tr("Portrait"));
