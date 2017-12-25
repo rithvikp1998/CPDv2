@@ -36,6 +36,12 @@ class PageSetupTab : public QWidget
     Q_OBJECT
 
 public:
+    QCheckBox *bothSidesCheckBox;
+    QComboBox *pagesPerSideComboBox;
+    QComboBox *onlyPrintComboBox;
+    QSpinBox *scaleSpinBox;
+    QComboBox *paperSourceComboBox;
+
     explicit PageSetupTab(QWidget *parent = 0);
 };
 
@@ -44,6 +50,12 @@ class OptionsTab : public QWidget
     Q_OBJECT
 
 public:
+    QLineEdit *marginTopValue;
+    QLineEdit *marginBottomValue;
+    QLineEdit *marginLeftValue;
+    QLineEdit *marginRightValue;
+    QComboBox *resolutionComboBox;
+
     explicit OptionsTab(QWidget *parent = 0);
 };
 
@@ -52,6 +64,10 @@ class JobsTab : public QWidget
     Q_OBJECT
 
 public:
+    QPushButton *refreshButton;
+    QComboBox *startJobComboBox;
+    QPushButton *saveJobButton;
+
     explicit JobsTab(QWidget *parent = 0);
 };
 

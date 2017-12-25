@@ -170,7 +170,12 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "ipp-attribute-fidelity", 22) == 0) {
 
         } else if (strncmp(key, "job-hold-until", 14) == 0) {
-            qDebug("Job-hold-until");
+            jobsTab->startJobComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                jobsTab->startJobComboBox->addItem(value->supported_values[i]);
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    jobsTab->startJobComboBox->setCurrentIndex(jobsTab->startJobComboBox->count() - 1);
+            }
         } else if (strncmp(key, "job-name", 8) == 0) {
 
         } else if (strncmp(key, "job-priority", 12) == 0) {
@@ -189,7 +194,12 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "multiple-document-handling", 26) == 0) {
 
         } else if (strncmp(key, "number-up", 9) == 0) {
-            qDebug("number-up");
+            pageSetupTab->pagesPerSideComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                pageSetupTab->pagesPerSideComboBox->addItem(value->supported_values[i]);
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    pageSetupTab->pagesPerSideComboBox->setCurrentIndex(pageSetupTab->pagesPerSideComboBox->count() - 1);
+            }
         } else if (strncmp(key, "output-bin", 10) == 0) {
 
         } else if (strncmp(key, "orientation-requested", 21) == 0) {
@@ -201,7 +211,12 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "print-quality", 13) == 0) {
 
         } else if (strncmp(key, "printer-resolution", 18) == 0) {
-            qDebug("resolution");
+            optionsTab->resolutionComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                optionsTab->resolutionComboBox->addItem(value->supported_values[i]);
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    optionsTab->resolutionComboBox->setCurrentIndex(optionsTab->resolutionComboBox->count() - 1);
+            }
         } else if (strncmp(key, "sides", 5) == 0) {
             qDebug("sides");
         } else {
@@ -260,14 +275,14 @@ GeneralTab::GeneralTab(QWidget *parent)
 
 PageSetupTab::PageSetupTab(QWidget *parent)
 {
-    QCheckBox *bothSidesCheckBox = new QCheckBox;
-    QComboBox *pagesPerSideComboBox = new QComboBox;
-    QComboBox *onlyPrintComboBox = new QComboBox;
-    QSpinBox *scaleSpinBox = new QSpinBox;
+    bothSidesCheckBox = new QCheckBox;
+    pagesPerSideComboBox = new QComboBox;
+    onlyPrintComboBox = new QComboBox;
+    scaleSpinBox = new QSpinBox;
     scaleSpinBox->setRange(0, 200);
     scaleSpinBox->setValue(100);
     scaleSpinBox->setSuffix("%");
-    QComboBox *paperSourceComboBox = new QComboBox;
+    paperSourceComboBox = new QComboBox;
 
     QFormLayout *layout = new QFormLayout;
 
@@ -286,11 +301,11 @@ PageSetupTab::PageSetupTab(QWidget *parent)
 
 OptionsTab::OptionsTab(QWidget *parent)
 {
-    QLineEdit *marginTopValue = new QLineEdit;
-    QLineEdit *marginBottomValue = new QLineEdit;
-    QLineEdit *marginLeftValue = new QLineEdit;
-    QLineEdit *marginRightValue = new QLineEdit;
-    QComboBox *resolutionComboBox = new QComboBox;
+    marginTopValue = new QLineEdit;
+    marginBottomValue = new QLineEdit;
+    marginLeftValue = new QLineEdit;
+    marginRightValue = new QLineEdit;
+    resolutionComboBox = new QComboBox;
 
     QFormLayout *layout = new QFormLayout;
 
@@ -318,9 +333,9 @@ JobsTab::JobsTab(QWidget *parent)
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidget(jobsWidget);
 
-    QPushButton *refreshButton = new QPushButton("Refresh");
-    QComboBox *startJobComboBox = new QComboBox;
-    QPushButton *saveJobButton = new QPushButton("Save");
+    refreshButton = new QPushButton("Refresh");
+    startJobComboBox = new QComboBox;
+    saveJobButton = new QPushButton("Save");
 
     QFormLayout *layout = new QFormLayout;
     layout->addRow(scrollArea);
