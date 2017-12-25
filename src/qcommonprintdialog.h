@@ -8,7 +8,11 @@
 #include "common-print-dialog_global.h"
 #include "singleton.h"
 
-#include <cpdb-libs-frontend.h>
+struct _FrontendObj;
+using FrontendObj = _FrontendObj;
+
+struct _PrinterObj;
+using PrinterObj = _PrinterObj;
 
 class GeneralTab : public QWidget
 {
