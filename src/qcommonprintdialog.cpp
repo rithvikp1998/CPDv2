@@ -11,6 +11,7 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     QDialog (parent)
 {
     resize(720, 480);
+    init_backend();
 
     QStringList destinationList;
 
@@ -26,7 +27,8 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     tabWidget->addTab(optionsTab, tr("Options"));
     tabWidget->addTab(jobsTab, tr("Jobs"));
 
-    preview = new QPrintPreviewWidget(parent);
+    QPrinter *printer = new QPrinter;
+    preview = new Preview(printer, uniqueID, this);
 
     QPushButton *printButton = new QPushButton(tr("Print"));
     printButton->setDefault(true);
@@ -39,15 +41,19 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     leftLayout->addWidget(tabWidget);
     leftLayout->addItem(buttonLayout);
 
+    QPushButton *showPrevPageButton = new QPushButton("<");
+    QPushButton *showNextPageButton = new QPushButton(">");
     QSpinBox *zoomSpinBox = new QSpinBox;
     zoomSpinBox->setRange(100,200);
     zoomSpinBox->setSuffix("%");
     QHBoxLayout *zoomSliderLayout = new QHBoxLayout;
-    zoomSliderLayout->addWidget(new QLabel(tr("Zoom")));
-    zoomSliderLayout->addWidget(zoomSpinBox);
+    zoomSliderLayout->addWidget(showPrevPageButton, 1);
+    zoomSliderLayout->addWidget(new QLabel(tr("Zoom")), 1, Qt::AlignHCenter);
+    zoomSliderLayout->addWidget(zoomSpinBox, 2);
+    zoomSliderLayout->addWidget(showNextPageButton, 1);
 
     QVBoxLayout *rightLayout = new QVBoxLayout;
-    rightLayout->addWidget(preview);
+    rightLayout->addWidget(preview->preview);
     rightLayout->addItem(zoomSliderLayout);
 
     QHBoxLayout *layout = new QHBoxLayout;
@@ -89,8 +95,6 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      SIGNAL(buttonClicked(int)),
                      this,
                      SLOT(orientationChanged(int)));
-
-    init_backend();
 }
 
 QCommonPrintDialog::~QCommonPrintDialog() = default;
@@ -103,6 +107,15 @@ void QCommonPrintDialog::init_backend()
     uniqueID = QUuid::createUuid().toString().remove('{').remove('}');
     f = get_new_FrontendObj(uniqueID.toLatin1().data(), add_cb, rem_cb);
     connect_to_dbus(f);
+}
+
+void QCommonPrintDialog::printPreview(QPrinter *printer)
+{
+    QPainter painter;
+    painter.begin(printer);
+    painter.setFont(QFont("Helvetica", 24, QFont::Bold, true));
+    painter.drawText(printer->pageRect(), Qt::AlignCenter, tr("Sample Preivew"));
+    painter.end();
 }
 
 CallbackFunctions::CallbackFunctions(QObject *parent):
@@ -349,4 +362,113 @@ JobsTab::JobsTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Save Job")), saveJobButton);
 
     setLayout(layout);
+}
+
+Preview::Preview(QPrinter *_printer, QString uniqueID, QWidget *parent) :
+    QWidget(parent),
+    printer(_printer)
+{
+    preview = new QPrintPreviewWidget(printer);
+
+    preview->setGeometry(0, 0, 380, 408);
+    preview->fitInView();
+
+    printer->setPaperSize(QPrinter::A4);
+    printer->setOrientation(QPrinter::Portrait);
+
+    uniqueID.prepend("/tmp/");
+    uniqueID.append(".pdf");
+
+    printer->setOutputFileName(uniqueID);
+    printer->setOutputFormat(QPrinter::NativeFormat);
+
+    QObject::connect(preview,
+                     SIGNAL(paintRequested(QPrinter *)),
+                     this,
+                     SLOT(printPreview(QPrinter *)));
+}
+
+Preview::~Preview() = default;
+
+void Preview::resize(const QRect &rect)
+{
+    QWidget::resize(rect.width(), rect.height());
+    preview->resize(rect.width(), rect.height());
+}
+
+void Preview::printPreview(QPrinter *printer)
+{
+    painter.begin(printer);
+
+    painter.setFont(QFont("Helvetica", 24, QFont::Bold, true));
+    painter.drawText(printer->pageRect(), Qt::AlignCenter, tr("Sample Preivew"));
+
+    painter.end();
+}
+
+void Preview::setOrientation(const QString &orientation)
+{
+    if (orientation.compare("portrait") == 0)
+        printer->setOrientation(QPrinter::Portrait);
+    else if (orientation.compare("landscape") == 0)
+        printer->setOrientation(QPrinter::Landscape);
+    else qDebug() << "Unhandled Orientation:" << orientation;
+
+    preview->updatePreview();
+}
+
+void Preview::setPageSize(QString name, qreal width, qreal height, QString unit)
+{
+    QPageSize::Unit pageSizeUnit = QPageSize::Unit::Inch;
+    if (unit.compare("in") == 0)
+        pageSizeUnit = QPageSize::Unit::Inch;
+    else if (unit.compare("mm") == 0)
+        pageSizeUnit = QPageSize::Unit::Millimeter;
+    else
+        qDebug() << "Unhandled Unit in Paper Size:" << unit;
+
+    printer->setPageSize(QPageSize(QSizeF(width, height),
+                                   pageSizeUnit,
+                                   name,
+                                   QPageSize::SizeMatchPolicy::FuzzyMatch));
+
+    preview->updatePreview();
+}
+
+void Preview::setNumCopies(int copies)
+{
+    printer->setNumCopies(copies);
+    preview->updatePreview();
+}
+
+void Preview::setCollateCopies(bool enabled)
+{
+    printer->setCollateCopies(enabled);
+    preview->updatePreview();
+}
+
+void Preview::setZoom(qreal zoomFactor)
+{
+    if (!zoomChanged) {
+        // Sets the base zoom factor if zoom has not been changed
+        baseZoomFactor = preview->zoomFactor();
+        zoomChanged = true;
+    }
+    /* Whenever zoom slider changes, it rescales it down to
+     * baseZoomFactor and then zoom in to the desired amount.
+     */
+    preview->setZoomFactor(baseZoomFactor);
+    preview->zoomIn(zoomFactor);
+}
+
+void Preview::showNextPage()
+{
+    pageNumber = pageNumber < (pageCount - 1) ? pageNumber + 1 : pageNumber;
+    preview->updatePreview();
+}
+
+void Preview::showPrevPage()
+{
+    pageNumber = pageNumber > 0 ? pageNumber - 1 : pageNumber;
+    preview->updatePreview();
 }

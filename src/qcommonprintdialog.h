@@ -71,6 +71,35 @@ public:
     explicit JobsTab(QWidget *parent = 0);
 };
 
+class Preview : public QWidget
+{
+    Q_OBJECT
+public:
+    QPrintPreviewWidget *preview;
+
+    Preview(QPrinter *_printer, QString uniqueID, QWidget *parent = Q_NULLPTR);
+    ~Preview();
+    void resize(const QRect &rect);
+    void setOrientation(const QString &orientation);
+    void setPageSize(QString name, qreal width, qreal height, QString unit);
+    void setNumCopies(int copies);
+    void setCollateCopies(bool enabled);
+
+public Q_SLOTS:
+    void printPreview(QPrinter *printer);
+    void setZoom(qreal zoomFactor);
+    void showNextPage();
+    void showPrevPage();
+
+private:
+    QPrinter *printer;
+    QPainter painter;
+    int pageNumber = 0;
+    int pageCount = 0;
+    qreal baseZoomFactor = 0;
+    bool zoomChanged = false;
+};
+
 class CallbackFunctions : public QObject
 {
     Q_OBJECT
@@ -104,6 +133,7 @@ private Q_SLOTS:
     void remotePrintersCheckBoxStateChanged(int state);
     void collateCheckBoxStateChanged(int state);
     void orientationChanged(int buttonId);
+    void printPreview(QPrinter *printer);
 
 private:
     GeneralTab *generalTab;
@@ -111,7 +141,7 @@ private:
     OptionsTab *optionsTab;
     JobsTab *jobsTab;
     QTabWidget *tabWidget;
-    QPrintPreviewWidget *preview;
+    Preview *preview;
     FrontendObj *f;
     PrinterObj *p;
     QString uniqueID;
