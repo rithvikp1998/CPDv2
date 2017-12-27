@@ -230,7 +230,12 @@ void QCommonPrintDialog::newPrinterSelected(int index)
                     pageSetupTab->pagesPerSideComboBox->setCurrentIndex(pageSetupTab->pagesPerSideComboBox->count() - 1);
             }
         } else if (strncmp(key, "output-bin", 10) == 0) {
-
+            optionsTab->outputBinComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                optionsTab->outputBinComboBox->addItem(value->supported_values[i]);
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    optionsTab->outputBinComboBox->setCurrentIndex(optionsTab->outputBinComboBox->count() - 1);
+            }
         } else if (strncmp(key, "orientation-requested", 21) == 0) {
             generalTab->orientationComboBox->clear();
             for (int i = 0; i < value->num_supported; i++){
@@ -241,9 +246,19 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "page-ranges", 11) == 0) {
 
         } else if (strncmp(key, "print-color-mode", 16) == 0) {
-
+            generalTab->colorModeComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                generalTab->colorModeComboBox->addItem(value->supported_values[i]);
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    generalTab->colorModeComboBox->setCurrentIndex(generalTab->colorModeComboBox->count() - 1);
+            }
         } else if (strncmp(key, "print-quality", 13) == 0) {
-
+            optionsTab->qualityComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                optionsTab->qualityComboBox->addItem(value->supported_values[i]);
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    optionsTab->qualityComboBox->setCurrentIndex(optionsTab->qualityComboBox->count() - 1);
+            }
         } else if (strncmp(key, "printer-resolution", 18) == 0) {
             optionsTab->resolutionComboBox->clear();
             for (int i = 0; i < value->num_supported; i++){
@@ -289,6 +304,7 @@ GeneralTab::GeneralTab(QWidget *parent)
     copiesSpinBox = new QSpinBox;
     collateCheckBox = new QCheckBox;
     orientationComboBox = new QComboBox;
+    colorModeComboBox = new QComboBox;
 
     pagesComboBox->addItem("All");
 
@@ -301,6 +317,7 @@ GeneralTab::GeneralTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Copies")), copiesSpinBox);
     layout->addRow(new QLabel(tr("Collate Pages")), collateCheckBox);
     layout->addRow(new QLabel(tr("Orientation")), orientationComboBox);
+    layout->addRow(new QLabel(tr("Color Mode")), colorModeComboBox);
 
     setLayout(layout);
 }
@@ -338,6 +355,8 @@ OptionsTab::OptionsTab(QWidget *parent)
     marginLeftValue = new QLineEdit;
     marginRightValue = new QLineEdit;
     resolutionComboBox = new QComboBox;
+    qualityComboBox = new QComboBox;
+    outputBinComboBox = new QComboBox;
 
     QFormLayout *layout = new QFormLayout;
 
@@ -348,6 +367,8 @@ OptionsTab::OptionsTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Right")), marginRightValue);
     layout->addRow(new QLabel(tr("")));
     layout->addRow(new QLabel(tr("Resolution")), resolutionComboBox);
+    layout->addRow(new QLabel(tr("Quality")), qualityComboBox);
+    layout->addRow(new QLabel(tr("Output Bin")), outputBinComboBox);
 
     setLayout(layout);
 }

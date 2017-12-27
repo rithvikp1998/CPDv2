@@ -27,6 +27,7 @@ public:
     QSpinBox *copiesSpinBox;
     QCheckBox *collateCheckBox;
     QComboBox *orientationComboBox;
+    QComboBox *colorModeComboBox;
 
     explicit GeneralTab(QWidget *parent = 0);
 };
@@ -55,6 +56,8 @@ public:
     QLineEdit *marginLeftValue;
     QLineEdit *marginRightValue;
     QComboBox *resolutionComboBox;
+    QComboBox *qualityComboBox;
+    QComboBox *outputBinComboBox;
 
     explicit OptionsTab(QWidget *parent = 0);
 };
