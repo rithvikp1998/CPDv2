@@ -26,7 +26,7 @@ public:
     QComboBox *pagesComboBox;
     QSpinBox *copiesSpinBox;
     QCheckBox *collateCheckBox;
-    QButtonGroup *orientationButtonGroup;
+    QComboBox *orientationComboBox;
 
     explicit GeneralTab(QWidget *parent = 0);
 };
@@ -128,10 +128,10 @@ private Q_SLOTS:
     void addPrinter(char *printer_name, char *printer_id, char *backend_name);
     void removePrinter(char *printer_name, char *printer_id, char *backend_name);
     void quit();
-    void newPrinterSelected(int);
+    void newPrinterSelected(int index);
     void remotePrintersCheckBoxStateChanged(int state);
     void collateCheckBoxStateChanged(int state);
-    void orientationChanged(int buttonId);
+    void orientationChanged(int index);
     void printPreview(QPrinter *printer);
 
 private:

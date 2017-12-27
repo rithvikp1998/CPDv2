@@ -92,8 +92,8 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      this,
                      SLOT(collateCheckBoxStateChanged(int)));
 
-    QObject::connect(generalTab->orientationButtonGroup,
-                     SIGNAL(buttonClicked(int)),
+    QObject::connect(generalTab->orientationComboBox,
+                     SIGNAL(currentIndexChanged(int)),
                      this,
                      SLOT(orientationChanged(int)));
 
@@ -232,7 +232,12 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "output-bin", 10) == 0) {
 
         } else if (strncmp(key, "orientation-requested", 21) == 0) {
-
+            generalTab->orientationComboBox->clear();
+            for (int i = 0; i < value->num_supported; i++){
+                generalTab->orientationComboBox->addItem(value->supported_values[i]);
+                if(strcmp(value->supported_values[i], value->default_value) == 0)
+                    generalTab->orientationComboBox->setCurrentIndex(generalTab->orientationComboBox->count() - 1);
+            }
         } else if (strncmp(key, "page-ranges", 11) == 0) {
 
         } else if (strncmp(key, "print-color-mode", 16) == 0) {
@@ -261,13 +266,15 @@ void QCommonPrintDialog::newPrinterSelected(int index)
 
 void QCommonPrintDialog::collateCheckBoxStateChanged(int state)
 {
-    qDebug("Collate CheckBox state changed");
+    QString collateSetting = state == Qt::Checked ? "separate-documents-collated-copies" :
+                                                    "separate-documents-uncollated-copies";
+    add_setting_to_printer(p, QString("multiple-document-handling").toLatin1().data(),
+                           collateSetting.toLatin1().data());
 }
 
-void QCommonPrintDialog::orientationChanged(int buttonId)
+void QCommonPrintDialog::orientationChanged(int index)
 {
-    qDebug("%d", buttonId);
-    QString orientation = buttonId == 1 ? "portrait" : "landscape";
+    QString orientation = generalTab->orientationComboBox->itemText(index);
     add_setting_to_printer(p, QString("orientation-requested").toLatin1().data(),
                            orientation.toLatin1().data());
 }
@@ -281,18 +288,9 @@ GeneralTab::GeneralTab(QWidget *parent)
     pagesComboBox = new QComboBox;
     copiesSpinBox = new QSpinBox;
     collateCheckBox = new QCheckBox;
+    orientationComboBox = new QComboBox;
 
     pagesComboBox->addItem("All");
-
-    orientationButtonGroup = new QButtonGroup;
-    QRadioButton *portraitButton = new QRadioButton(tr("Portrait"));
-    QRadioButton *landscapeButton = new QRadioButton(tr("Landscape"));
-    orientationButtonGroup->addButton(portraitButton, 1);
-    orientationButtonGroup->addButton(landscapeButton, 2);
-    QHBoxLayout *orientationButtonsLayout = new QHBoxLayout;
-    orientationButtonsLayout->addWidget(portraitButton);
-    orientationButtonsLayout->addWidget(landscapeButton);
-    portraitButton->setChecked(true);
 
     QFormLayout *layout = new QFormLayout;
 
@@ -302,7 +300,7 @@ GeneralTab::GeneralTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Pages")), pagesComboBox);
     layout->addRow(new QLabel(tr("Copies")), copiesSpinBox);
     layout->addRow(new QLabel(tr("Collate Pages")), collateCheckBox);
-    layout->addRow(new QLabel(tr("Orientation")), orientationButtonsLayout);
+    layout->addRow(new QLabel(tr("Orientation")), orientationComboBox);
 
     setLayout(layout);
 }
