@@ -199,12 +199,7 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "ipp-attribute-fidelity", 22) == 0) {
 
         } else if (strncmp(key, "job-hold-until", 14) == 0) {
-            jobsTab->startJobComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                jobsTab->startJobComboBox->addItem(value->supported_values[i]);
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    jobsTab->startJobComboBox->setCurrentIndex(jobsTab->startJobComboBox->count() - 1);
-            }
+            fillComboBox(jobsTab->startJobComboBox, value);
         } else if (strncmp(key, "job-name", 8) == 0) {
 
         } else if (strncmp(key, "job-priority", 12) == 0) {
@@ -223,59 +218,34 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "multiple-document-handling", 26) == 0) {
 
         } else if (strncmp(key, "number-up", 9) == 0) {
-            pageSetupTab->pagesPerSideComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                pageSetupTab->pagesPerSideComboBox->addItem(value->supported_values[i]);
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    pageSetupTab->pagesPerSideComboBox->setCurrentIndex(pageSetupTab->pagesPerSideComboBox->count() - 1);
-            }
+            fillComboBox(pageSetupTab->pagesPerSideComboBox, value);
         } else if (strncmp(key, "output-bin", 10) == 0) {
-            optionsTab->outputBinComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                optionsTab->outputBinComboBox->addItem(value->supported_values[i]);
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    optionsTab->outputBinComboBox->setCurrentIndex(optionsTab->outputBinComboBox->count() - 1);
-            }
+            fillComboBox(optionsTab->outputBinComboBox, value);
         } else if (strncmp(key, "orientation-requested", 21) == 0) {
-            generalTab->orientationComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                generalTab->orientationComboBox->addItem(value->supported_values[i]);
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    generalTab->orientationComboBox->setCurrentIndex(generalTab->orientationComboBox->count() - 1);
-            }
+            fillComboBox(generalTab->orientationComboBox, value);
         } else if (strncmp(key, "page-ranges", 11) == 0) {
 
         } else if (strncmp(key, "print-color-mode", 16) == 0) {
-            generalTab->colorModeComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                generalTab->colorModeComboBox->addItem(value->supported_values[i]);
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    generalTab->colorModeComboBox->setCurrentIndex(generalTab->colorModeComboBox->count() - 1);
-            }
+            fillComboBox(generalTab->colorModeComboBox, value);
         } else if (strncmp(key, "print-quality", 13) == 0) {
-            optionsTab->qualityComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                optionsTab->qualityComboBox->addItem(value->supported_values[i]);
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    optionsTab->qualityComboBox->setCurrentIndex(optionsTab->qualityComboBox->count() - 1);
-            }
+            fillComboBox(optionsTab->qualityComboBox, value);
         } else if (strncmp(key, "printer-resolution", 18) == 0) {
-            optionsTab->resolutionComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                optionsTab->resolutionComboBox->addItem(value->supported_values[i]);
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    optionsTab->resolutionComboBox->setCurrentIndex(optionsTab->resolutionComboBox->count() - 1);
-            }
+            fillComboBox(optionsTab->resolutionComboBox, value);
         } else if (strncmp(key, "sides", 5) == 0) {
-            pageSetupTab->bothSidesComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                pageSetupTab->bothSidesComboBox->addItem(value->supported_values[i]);
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    pageSetupTab->bothSidesComboBox->setCurrentIndex(pageSetupTab->bothSidesComboBox->count() - 1);
-            }
+            fillComboBox(pageSetupTab->bothSidesComboBox, value);
         } else {
             qDebug() << "Unhandled Option:" << key;
         }
+    }
+}
+
+void QCommonPrintDialog::fillComboBox(QComboBox *comboBox, Option *value)
+{
+    comboBox->clear();
+    for (int i = 0; i < value->num_supported; i++){
+        comboBox->addItem(value->supported_values[i]);
+        if(strcmp(value->supported_values[i], value->default_value) == 0)
+            comboBox->setCurrentIndex(comboBox->count() - 1);
     }
 }
 

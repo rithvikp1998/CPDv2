@@ -15,6 +15,9 @@ using FrontendObj = _FrontendObj;
 struct _PrinterObj;
 using PrinterObj = _PrinterObj;
 
+struct _Option;
+using Option = _Option;
+
 class GeneralTab : public QWidget
 {
     Q_OBJECT
@@ -136,6 +139,7 @@ private Q_SLOTS:
     void collateCheckBoxStateChanged(int state);
     void orientationChanged(int index);
     void printPreview(QPrinter *printer);
+    void fillComboBox(QComboBox *comboBox, Option *value);
 
 private:
     GeneralTab *generalTab;
