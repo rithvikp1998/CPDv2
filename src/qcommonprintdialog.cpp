@@ -46,6 +46,7 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     QSpinBox *zoomSpinBox = new QSpinBox;
     zoomSpinBox->setRange(100,200);
     zoomSpinBox->setSuffix("%");
+    zoomSpinBox->setSingleStep(10);
     QHBoxLayout *zoomSliderLayout = new QHBoxLayout;
     zoomSliderLayout->addWidget(showPrevPageButton, 1);
     zoomSliderLayout->addWidget(new QLabel(tr("Zoom")), 1, Qt::AlignHCenter);
@@ -95,6 +96,21 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      SIGNAL(buttonClicked(int)),
                      this,
                      SLOT(orientationChanged(int)));
+
+    QObject::connect(zoomSpinBox,
+                     SIGNAL(valueChanged(int)),
+                     preview,
+                     SLOT(setZoom(int)));
+
+    QObject::connect(showPrevPageButton,
+                     SIGNAL(clicked()),
+                     preview,
+                     SLOT(showPrevPage()));
+
+    QObject::connect(showNextPageButton,
+                     SIGNAL(clicked()),
+                     preview,
+                     SLOT(showNextPage()));
 }
 
 QCommonPrintDialog::~QCommonPrintDialog() = default;
@@ -390,12 +406,6 @@ Preview::Preview(QPrinter *_printer, QString uniqueID, QWidget *parent) :
 
 Preview::~Preview() = default;
 
-void Preview::resize(const QRect &rect)
-{
-    QWidget::resize(rect.width(), rect.height());
-    preview->resize(rect.width(), rect.height());
-}
-
 void Preview::printPreview(QPrinter *printer)
 {
     painter.begin(printer);
@@ -447,7 +457,7 @@ void Preview::setCollateCopies(bool enabled)
     preview->updatePreview();
 }
 
-void Preview::setZoom(qreal zoomFactor)
+void Preview::setZoom(int zoomFactor)
 {
     if (!zoomChanged) {
         // Sets the base zoom factor if zoom has not been changed
@@ -458,7 +468,7 @@ void Preview::setZoom(qreal zoomFactor)
      * baseZoomFactor and then zoom in to the desired amount.
      */
     preview->setZoomFactor(baseZoomFactor);
-    preview->zoomIn(zoomFactor);
+    preview->zoomIn(zoomFactor/100.0);
 }
 
 void Preview::showNextPage()

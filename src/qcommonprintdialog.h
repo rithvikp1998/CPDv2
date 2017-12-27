@@ -79,7 +79,6 @@ public:
 
     Preview(QPrinter *_printer, QString uniqueID, QWidget *parent = Q_NULLPTR);
     ~Preview();
-    void resize(const QRect &rect);
     void setOrientation(const QString &orientation);
     void setPageSize(QString name, qreal width, qreal height, QString unit);
     void setNumCopies(int copies);
@@ -87,7 +86,7 @@ public:
 
 public Q_SLOTS:
     void printPreview(QPrinter *printer);
-    void setZoom(qreal zoomFactor);
+    void setZoom(int zoomFactor);
     void showNextPage();
     void showPrevPage();
 
