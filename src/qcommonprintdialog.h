@@ -45,6 +45,7 @@ public:
     QComboBox *onlyPrintComboBox;
     QSpinBox *scaleSpinBox;
     QComboBox *paperSourceComboBox;
+    QComboBox *pageRangeComboBox;
 
     explicit PageSetupTab(QWidget *parent = 0);
 };
@@ -61,6 +62,8 @@ public:
     QComboBox *resolutionComboBox;
     QComboBox *qualityComboBox;
     QComboBox *outputBinComboBox;
+    QComboBox *finishingsComboBox;
+    QComboBox *ippAttributeFidelityComboBox;
 
     explicit OptionsTab(QWidget *parent = 0);
 };
@@ -73,6 +76,9 @@ public:
     QPushButton *refreshButton;
     QComboBox *startJobComboBox;
     QPushButton *saveJobButton;
+    QComboBox *jobPriorityComboBox;
+    QComboBox *jobSheetsComboBox;
+    QComboBox *jobNameComboBox;
 
     explicit JobsTab(QWidget *parent = 0);
 };
@@ -140,6 +146,9 @@ private Q_SLOTS:
     void orientationChanged(int index);
     void printPreview(QPrinter *printer);
     void fillComboBox(QComboBox *comboBox, Option *value);
+    void fillCollateCheckBox(Option *value);
+    void fillMediaComboBox(Option *value);
+    void fillCopiesOption(Option *value);
 
 private:
     GeneralTab *generalTab;

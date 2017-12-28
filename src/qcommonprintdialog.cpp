@@ -13,8 +13,6 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     resize(720, 480);
     init_backend();
 
-    QStringList destinationList;
-
     tabWidget = new QTabWidget;
 
     generalTab = new GeneralTab(parent);
@@ -190,33 +188,25 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         char *key = static_cast<char *>(_key);
         Option *value = static_cast<Option *>(_value);
         if (strncmp(key, "copies", 6) == 0) {
-            QString copies(value->supported_values[0]);
-            QStringList numCopies = copies.split("-"); // copies is in format 1-9999
-            generalTab->copiesSpinBox->setRange(numCopies[0].toInt(), numCopies[1].toInt());
-            generalTab->copiesSpinBox->setValue(numCopies[0].toInt());
+            fillCopiesOption(value);
         } else if (strncmp(key, "finishings", 10) == 0) {
-
+            fillComboBox(optionsTab->finishingsComboBox, value);
         } else if (strncmp(key, "ipp-attribute-fidelity", 22) == 0) {
-
+            fillComboBox(optionsTab->ippAttributeFidelityComboBox, value);
         } else if (strncmp(key, "job-hold-until", 14) == 0) {
             fillComboBox(jobsTab->startJobComboBox, value);
         } else if (strncmp(key, "job-name", 8) == 0) {
-
+            fillComboBox(jobsTab->jobNameComboBox, value);
         } else if (strncmp(key, "job-priority", 12) == 0) {
-
+            fillComboBox(jobsTab->jobPriorityComboBox, value);
         } else if (strncmp(key, "job-sheets", 10) == 0) {
-
+            fillComboBox(jobsTab->jobSheetsComboBox, value);
         } else if (strncmp(key, "media-col", 9) == 0) {
 
         } else if (strncmp(key, "media", 5) == 0) {
-            generalTab->paperComboBox->clear();
-            for (int i = 0; i < value->num_supported; i++){
-                generalTab->paperComboBox->addItem(pwg_to_readable(value->supported_values[i]));
-                if(strcmp(value->supported_values[i], value->default_value) == 0)
-                    generalTab->paperComboBox->setCurrentIndex(generalTab->paperComboBox->count() - 1);
-            }
+            fillMediaComboBox(value);
         } else if (strncmp(key, "multiple-document-handling", 26) == 0) {
-
+            fillCollateCheckBox(value);
         } else if (strncmp(key, "number-up", 9) == 0) {
             fillComboBox(pageSetupTab->pagesPerSideComboBox, value);
         } else if (strncmp(key, "output-bin", 10) == 0) {
@@ -224,7 +214,7 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "orientation-requested", 21) == 0) {
             fillComboBox(generalTab->orientationComboBox, value);
         } else if (strncmp(key, "page-ranges", 11) == 0) {
-
+            fillComboBox(pageSetupTab->pageRangeComboBox, value);
         } else if (strncmp(key, "print-color-mode", 16) == 0) {
             fillComboBox(generalTab->colorModeComboBox, value);
         } else if (strncmp(key, "print-quality", 13) == 0) {
@@ -239,6 +229,24 @@ void QCommonPrintDialog::newPrinterSelected(int index)
     }
 }
 
+void QCommonPrintDialog::fillCopiesOption(Option *value)
+{
+    QString copies(value->supported_values[0]);
+    QStringList numCopies = copies.split("-"); // copies is in format 1-9999
+    generalTab->copiesSpinBox->setRange(numCopies[0].toInt(), numCopies[1].toInt());
+    generalTab->copiesSpinBox->setValue(numCopies[0].toInt());
+}
+
+void QCommonPrintDialog::fillMediaComboBox(Option *value)
+{
+    generalTab->paperComboBox->clear();
+    for (int i = 0; i < value->num_supported; i++){
+        generalTab->paperComboBox->addItem(pwg_to_readable(value->supported_values[i]));
+        if(strcmp(value->supported_values[i], value->default_value) == 0)
+            generalTab->paperComboBox->setCurrentIndex(generalTab->paperComboBox->count() - 1);
+    }
+}
+
 void QCommonPrintDialog::fillComboBox(QComboBox *comboBox, Option *value)
 {
     comboBox->clear();
@@ -246,6 +254,32 @@ void QCommonPrintDialog::fillComboBox(QComboBox *comboBox, Option *value)
         comboBox->addItem(value->supported_values[i]);
         if(strcmp(value->supported_values[i], value->default_value) == 0)
             comboBox->setCurrentIndex(comboBox->count() - 1);
+    }
+    if (comboBox->count() == 0)
+        comboBox->setEnabled(false);
+}
+
+void QCommonPrintDialog::fillCollateCheckBox(Option *value)
+{
+    if (value->num_supported == 0) {
+        generalTab->collateCheckBox->setEnabled(false);
+    }
+    else if (value->num_supported == 1){
+        if (strcmp(value->supported_values[0], " separate-documents-collated-copies") == 0) {
+            generalTab->collateCheckBox->setChecked(true);
+            generalTab->collateCheckBox->setEnabled(false);
+        } else {
+            generalTab->collateCheckBox->setChecked(false);
+            generalTab->collateCheckBox->setEnabled(false);
+        }
+    }
+    else {
+        if (strcmp(value->default_value, " separate-documents-collated-copies") == 0)
+            generalTab->collateCheckBox->setChecked(true);
+        else if (strcmp(value->default_value, " separate-documents-uncollated-copies") == 0)
+            generalTab->collateCheckBox->setChecked(false);
+        else
+            generalTab->collateCheckBox->setChecked(false);
     }
 }
 
@@ -302,6 +336,7 @@ PageSetupTab::PageSetupTab(QWidget *parent)
     scaleSpinBox->setValue(100);
     scaleSpinBox->setSuffix("%");
     paperSourceComboBox = new QComboBox;
+    pageRangeComboBox = new QComboBox;
 
     QFormLayout *layout = new QFormLayout;
 
@@ -327,6 +362,8 @@ OptionsTab::OptionsTab(QWidget *parent)
     resolutionComboBox = new QComboBox;
     qualityComboBox = new QComboBox;
     outputBinComboBox = new QComboBox;
+    finishingsComboBox = new QComboBox;
+    ippAttributeFidelityComboBox = new QComboBox;
 
     QFormLayout *layout = new QFormLayout;
 
@@ -339,6 +376,7 @@ OptionsTab::OptionsTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Resolution")), resolutionComboBox);
     layout->addRow(new QLabel(tr("Quality")), qualityComboBox);
     layout->addRow(new QLabel(tr("Output Bin")), outputBinComboBox);
+    layout->addRow(new QLabel(tr("Finishings")), finishingsComboBox);
 
     setLayout(layout);
 }
@@ -359,12 +397,18 @@ JobsTab::JobsTab(QWidget *parent)
     refreshButton = new QPushButton("Refresh");
     startJobComboBox = new QComboBox;
     saveJobButton = new QPushButton("Save");
+    jobNameComboBox = new QComboBox;
+    jobPriorityComboBox = new QComboBox;
+    jobSheetsComboBox = new QComboBox;
 
     QFormLayout *layout = new QFormLayout;
     layout->addRow(scrollArea);
     layout->addRow(new QLabel(tr("Refresh")), refreshButton);
     layout->addRow(new QLabel(tr("Start Job")), startJobComboBox);
     layout->addRow(new QLabel(tr("Save Job")), saveJobButton);
+    layout->addRow(new QLabel(tr("Job Name")), jobNameComboBox);
+    layout->addRow(new QLabel(tr("Job Priority")), jobPriorityComboBox);
+    layout->addRow(new QLabel(tr("Job Sheets")), jobSheetsComboBox);
 
     setLayout(layout);
 }
