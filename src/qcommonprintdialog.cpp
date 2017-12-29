@@ -109,6 +109,13 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      SIGNAL(clicked()),
                      preview,
                      SLOT(showNextPage()));
+
+    QObject::connect(jobsTab->refreshButton,
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(refreshJobs()));
+
+    refreshJobs();
 }
 
 QCommonPrintDialog::~QCommonPrintDialog() = default;
@@ -130,6 +137,37 @@ void QCommonPrintDialog::printPreview(QPrinter *printer)
     painter.setFont(QFont("Helvetica", 24, QFont::Bold, true));
     painter.drawText(printer->pageRect(), Qt::AlignCenter, tr("Sample Preivew"));
     painter.end();
+}
+
+void QCommonPrintDialog::refreshJobs()
+{
+    QGridLayout *layout = jobsTab->jobsLayout;
+    QLayoutItem *item;
+    while((item = layout->takeAt(0))) {
+        if(item->layout()){
+            qDebug("Please don't");
+        }
+        if (item->widget()) {
+            delete item->widget();
+        }
+        delete item;
+    }
+
+    layout->addWidget(new QLabel(tr("Printer")), 0, 0);
+    layout->addWidget(new QLabel(tr("Location")), 0, 1);
+    layout->addWidget(new QLabel(tr("Status")), 0, 2);
+
+    Job *job;
+    bool activeJobsOnly = false;
+    int jobsCount = get_all_jobs(f, &job, activeJobsOnly);
+
+    PrinterObj *pObj;
+    for (int i = 0; i < jobsCount; i++) {
+        pObj = find_PrinterObj(f, job[i].printer_id, job[i].backend_name);
+        layout->addWidget(new QLabel(job[i].printer_id), i+1, 0);
+        layout->addWidget(new QLabel(pObj->location), i+1, 1);
+        layout->addWidget(new QLabel(job[i].state), i+1, 2);
+    }
 }
 
 CallbackFunctions::CallbackFunctions(QObject *parent):
@@ -384,14 +422,15 @@ OptionsTab::OptionsTab(QWidget *parent)
 JobsTab::JobsTab(QWidget *parent)
 {
     QWidget *jobsWidget = new QWidget;
-    QGridLayout *jobsLayout = new QGridLayout;
+    jobsLayout = new QGridLayout;
 
-    jobsLayout->addWidget(new QLabel(tr("Printer")), 1, 1);
-    jobsLayout->addWidget(new QLabel(tr("Location")), 1, 2);
-    jobsLayout->addWidget(new QLabel(tr("Status")), 1, 3);
+    jobsLayout->addWidget(new QLabel(tr("Printer")), 0, 0);
+    jobsLayout->addWidget(new QLabel(tr("Location")), 0, 1);
+    jobsLayout->addWidget(new QLabel(tr("Status")), 0, 2);
+
     jobsWidget->setLayout(jobsLayout);
 
-    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea = new QScrollArea;
     scrollArea->setWidget(jobsWidget);
 
     refreshButton = new QPushButton("Refresh");

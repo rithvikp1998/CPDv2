@@ -79,6 +79,8 @@ public:
     QComboBox *jobPriorityComboBox;
     QComboBox *jobSheetsComboBox;
     QComboBox *jobNameComboBox;
+    QGridLayout *jobsLayout;
+    QScrollArea *scrollArea;
 
     explicit JobsTab(QWidget *parent = 0);
 };
@@ -149,6 +151,7 @@ private Q_SLOTS:
     void fillCollateCheckBox(Option *value);
     void fillMediaComboBox(Option *value);
     void fillCopiesOption(Option *value);
+    void refreshJobs();
 
 private:
     GeneralTab *generalTab;
