@@ -115,6 +115,31 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      this,
                      SLOT(refreshJobs()));
 
+    QObject::connect(generalTab->paperComboBox,
+                     SIGNAL(currentIndexChanged(int)),
+                     this,
+                     SLOT(newPageSizeSelected(int)));
+
+    QObject::connect(generalTab->colorModeComboBox,
+                     SIGNAL(currentIndexChanged(int)),
+                     this,
+                     SLOT(newColorModeSelected(int)));
+
+    QObject::connect(optionsTab->resolutionComboBox,
+                     SIGNAL(currentIndexChanged(int)),
+                     this,
+                     SLOT(newResolutionSelected(int)));
+
+    QObject::connect(generalTab->collateCheckBox,
+                     SIGNAL(stateChanged(int)),
+                     this,
+                     SLOT(collateCheckBoxToggled(int)));
+
+    QObject::connect(pageSetupTab->bothSidesComboBox,
+                     SIGNAL(currentIndexChanged(int)),
+                     this,
+                     SLOT(newDuplexOptionSelected(int)));
+
     refreshJobs();
 }
 
@@ -334,6 +359,71 @@ void QCommonPrintDialog::orientationChanged(int index)
     QString orientation = generalTab->orientationComboBox->itemText(index);
     add_setting_to_printer(p, QString("orientation-requested").toLatin1().data(),
                            orientation.toLatin1().data());
+    preview->setOrientation(orientation);
+}
+
+void QCommonPrintDialog::newPageSizeSelected(int index)
+{
+    QString pageSize = readable_to_pwg(generalTab->paperComboBox->itemText(index).toLatin1().data());
+    if(pageSize == "")
+        return;
+    QStringList pageSizeSplitList = pageSize.split("_");
+    QString size = pageSizeSplitList[2];
+    QStringList sizeSplitList = size.split("x");
+
+    qreal width = sizeSplitList[0].toDouble();
+
+    QString unit = sizeSplitList[1].right(2);
+    sizeSplitList[1].remove(unit);
+
+    qreal height = sizeSplitList[1].toDouble();
+
+    preview->setPageSize(pageSizeSplitList[1], width, height, unit);
+    add_setting_to_printer(p,
+                           QString("media").toLatin1().data(),
+                           pageSize.toLatin1().data());
+}
+
+void QCommonPrintDialog::newColorModeSelected(int index)
+{
+    QString colorMode = generalTab->colorModeComboBox->itemText(index);
+    if(colorMode == "")
+        return;
+    add_setting_to_printer(p, "print-color-mode", colorMode.toLatin1().data());
+    if(colorMode.compare("color") == 0)
+        preview->printer->setColorMode(QPrinter::Color);
+    else if(colorMode.compare("monochrome") == 0)
+        preview->printer->setColorMode(QPrinter::GrayScale);
+    else
+        qDebug("Unhandled color mode option: %s", colorMode.toLatin1().data());
+    preview->update();
+}
+
+void QCommonPrintDialog::newResolutionSelected(int index)
+{
+    QString resolution = optionsTab->resolutionComboBox->itemText(index);
+    if(resolution == "")
+        return;
+    add_setting_to_printer(p, "print-resolution", resolution.toLatin1().data());
+    int resolutionValue = resolution.replace("dpi", "").toInt();
+    preview->printer->setResolution(resolutionValue);
+    preview->update();
+}
+
+void QCommonPrintDialog::newDuplexOptionSelected(int index)
+{
+    QString duplexOption = pageSetupTab->bothSidesComboBox->itemText(index);
+    if(duplexOption == "")
+        return;
+    add_setting_to_printer(p, "sides", duplexOption.toLatin1().data());
+    if(duplexOption.compare("one-sided") == 0)
+        preview->printer->setDuplex(QPrinter::DuplexNone);
+    else if(duplexOption.compare("two-sided-long-edge") == 0)
+        preview->printer->setDuplex(QPrinter::DuplexLongSide);
+    else if(duplexOption.compare("two-sided-short-edge") == 0)
+        preview->printer->setDuplex(QPrinter::DuplexShortSide);
+    else
+        qDebug("Unhandled duplex option: %s", duplexOption.toLatin1().data());
 }
 
 GeneralTab::GeneralTab(QWidget *parent)

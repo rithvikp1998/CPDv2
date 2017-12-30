@@ -90,6 +90,7 @@ class Preview : public QWidget
     Q_OBJECT
 public:
     QPrintPreviewWidget *preview;
+    QPrinter *printer;
 
     Preview(QPrinter *_printer, QString uniqueID, QWidget *parent = Q_NULLPTR);
     ~Preview();
@@ -105,7 +106,6 @@ public Q_SLOTS:
     void showPrevPage();
 
 private:
-    QPrinter *printer;
     QPainter painter;
     int pageNumber = 0;
     int pageCount = 0;
@@ -152,6 +152,11 @@ private Q_SLOTS:
     void fillMediaComboBox(Option *value);
     void fillCopiesOption(Option *value);
     void refreshJobs();
+    void newPageSizeSelected(int index);
+    void newColorModeSelected(int index);
+    void newResolutionSelected(int index);
+    void collateCheckBoxToggled(int state);
+    void newDuplexOptionSelected(int index);
 
 private:
     GeneralTab *generalTab;
