@@ -14,9 +14,6 @@ HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L/usr/local/release/ -lcommon-print-dialog
-else:win32:CONFIG(debug, debug|release): LIBS += -L/usr/local/debug/ -lcommon-print-dialog
-else:unix: LIBS += -L/usr/local/ -lcommon-print-dialog
+LIBS += -lcommon-print-dialog
 
-INCLUDEPATH += /usr/local/include/common-print-dialog
-DEPENDPATH += /usr/local/include/common-print-dialog
+INCLUDEPATH += /usr/include/common-print-dialog

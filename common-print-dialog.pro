@@ -16,8 +16,8 @@ HEADERS += \
     src/singleton.h
 
 unix {
-    target.path = /usr/local
-    headerfiles.path = /usr/local/include/common-print-dialog
+    target.path = /usr/lib
+    headerfiles.path = /usr/include/common-print-dialog
     headerfiles.files = $$PWD/src/*.h
     INSTALLS += target headerfiles
     CONFIG += link_pkgconfig
