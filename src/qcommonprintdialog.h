@@ -155,7 +155,6 @@ private Q_SLOTS:
     void newPageSizeSelected(int index);
     void newColorModeSelected(int index);
     void newResolutionSelected(int index);
-    void collateCheckBoxToggled(int state);
     void newDuplexOptionSelected(int index);
 
 private:

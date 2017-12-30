@@ -130,11 +130,6 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      this,
                      SLOT(newResolutionSelected(int)));
 
-    QObject::connect(generalTab->collateCheckBox,
-                     SIGNAL(stateChanged(int)),
-                     this,
-                     SLOT(collateCheckBoxToggled(int)));
-
     QObject::connect(pageSetupTab->bothSidesComboBox,
                      SIGNAL(currentIndexChanged(int)),
                      this,
@@ -352,6 +347,7 @@ void QCommonPrintDialog::collateCheckBoxStateChanged(int state)
                                                     "separate-documents-uncollated-copies";
     add_setting_to_printer(p, QString("multiple-document-handling").toLatin1().data(),
                            collateSetting.toLatin1().data());
+    preview->printer->setCollateCopies(state==Qt::Checked);
 }
 
 void QCommonPrintDialog::orientationChanged(int index)
