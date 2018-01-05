@@ -282,9 +282,31 @@ void QCommonPrintDialog::newPrinterSelected(int index)
         } else if (strncmp(key, "sides", 5) == 0) {
             fillComboBox(pageSetupTab->bothSidesComboBox, value);
         } else {
-            qDebug() << "Unhandled Option:" << key;
+            createNewComboBoxAndFill(key, value);
         }
     }
+}
+
+void QCommonPrintDialog::createNewComboBoxAndFill(char *optionName, Option *value)
+{
+    QComboBox *comboBox = new QComboBox;
+    comboBox->setProperty("optionName", optionName);
+    fillComboBox(comboBox, value);
+
+    optionsTab->layout->addRow(new QLabel(tr(optionName)), comboBox);
+
+    QObject::connect(comboBox,
+                     SIGNAL(currentIndexChanged(const QString&)),
+                     this,
+                     SLOT(changePrinterSetting(const QString&)));
+}
+
+void QCommonPrintDialog::changePrinterSetting(const QString &text)
+{
+    QString optionName = qvariant_cast<QString>(sender()->property("optionName"));
+    QString optionValue = text;
+    qDebug("%s: %s", optionName.toLatin1().data(), text.toLatin1().data());
+    add_setting_to_printer(p, optionName.toLatin1().data(), text.toLatin1().data());
 }
 
 void QCommonPrintDialog::fillCopiesOption(Option *value)
@@ -489,7 +511,7 @@ OptionsTab::OptionsTab(QWidget *parent)
     finishingsComboBox = new QComboBox;
     ippAttributeFidelityComboBox = new QComboBox;
 
-    QFormLayout *layout = new QFormLayout;
+    layout = new QFormLayout;
 
     layout->addRow((new QLabel(tr("Margin"))));
     layout->addRow(new QLabel(tr("Top")), marginTopValue);

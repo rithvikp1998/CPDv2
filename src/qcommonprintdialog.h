@@ -64,6 +64,7 @@ public:
     QComboBox *outputBinComboBox;
     QComboBox *finishingsComboBox;
     QComboBox *ippAttributeFidelityComboBox;
+    QFormLayout *layout;
 
     explicit OptionsTab(QWidget *parent = 0);
 };
@@ -156,6 +157,8 @@ private Q_SLOTS:
     void newColorModeSelected(int index);
     void newResolutionSelected(int index);
     void newDuplexOptionSelected(int index);
+    void createNewComboBoxAndFill(char *optionName, Option *value);
+    void changePrinterSetting(const QString &text);
 
 private:
     GeneralTab *generalTab;
