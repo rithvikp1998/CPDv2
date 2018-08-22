@@ -70,6 +70,11 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
                      this,
                      SLOT(removePrinter(char *, char *, char *)));
 
+    QObject::connect(printButton,
+                     SIGNAL(clicked()),
+                     this,
+                     SLOT(printJob()));
+
     QObject::connect(cancelButton,
                      SIGNAL(clicked()),
                      this,
@@ -219,6 +224,39 @@ void QCommonPrintDialog::removePrinter(char *printer_name, char *printer_id, cha
     generalTab->destinationComboBox->removeItem(i);
 
     (void)printer_name;
+}
+
+void QCommonPrintDialog::printJob()
+{
+    QString printerName = generalTab->destinationComboBox->currentText();
+    QString backendName = destinationList[generalTab->destinationComboBox->currentIndex()].split('#')[1];
+
+    QByteArray printer_name_ba = printerName.toLocal8Bit();
+    char *printer_name = printer_name_ba.data();
+
+    QByteArray backend_name_ba = backendName.toLocal8Bit();
+    char *backend_name = backend_name_ba.data();
+
+    qDebug("%s %s", printer_name, backend_name);
+
+    if(!f){
+        qCritical("Frontend object not found");
+        return;
+    }
+
+    PrinterObj *p = find_PrinterObj(f, printer_name, backend_name);
+    if(!p){
+        qCritical("Printer %s not found", printer_name);
+        return;
+    }
+
+    QString filePath = "../test.pdf";
+    QByteArray file_path_ba = filePath.toLocal8Bit();
+    char *file_path = file_path_ba.data();
+
+    qDebug("So far?");
+
+    print_file(p, file_path);
 }
 
 void QCommonPrintDialog::quit()
