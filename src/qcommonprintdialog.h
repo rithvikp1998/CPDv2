@@ -32,7 +32,7 @@ public:
     QComboBox *orientationComboBox;
     QComboBox *colorModeComboBox;
 
-    explicit GeneralTab(QWidget *parent = 0);
+    explicit GeneralTab(QWidget *parent = nullptr);
 };
 
 class PageSetupTab : public QWidget
@@ -47,7 +47,7 @@ public:
     QComboBox *paperSourceComboBox;
     QComboBox *pageRangeComboBox;
 
-    explicit PageSetupTab(QWidget *parent = 0);
+    explicit PageSetupTab(QWidget *parent = nullptr);
 };
 
 class OptionsTab : public QWidget
@@ -66,7 +66,7 @@ public:
     QComboBox *ippAttributeFidelityComboBox;
     QFormLayout *layout;
 
-    explicit OptionsTab(QWidget *parent = 0);
+    explicit OptionsTab(QWidget *parent = nullptr);
 };
 
 class JobsTab : public QWidget
@@ -83,7 +83,7 @@ public:
     QGridLayout *jobsLayout;
     QScrollArea *scrollArea;
 
-    explicit JobsTab(QWidget *parent = 0);
+    explicit JobsTab(QWidget *parent = nullptr);
 };
 
 class Preview : public QWidget
@@ -118,7 +118,7 @@ class CallbackFunctions : public QObject
 {
     Q_OBJECT
 public:
-    explicit CallbackFunctions(QObject *parent = 0);
+    explicit CallbackFunctions(QObject *parent = nullptr);
     static void add_printer_callback(PrinterObj *p);
     static void remove_printer_callback(PrinterObj *p);
 
@@ -135,7 +135,7 @@ class QCommonPrintDialog : public QDialog
 public:
     QStringList destinationList;
 
-    explicit QCommonPrintDialog(QWidget *parent = 0);
+    explicit QCommonPrintDialog(QWidget *parent = nullptr);
     ~QCommonPrintDialog();
     void init_backend();
 

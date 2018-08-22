@@ -142,8 +142,8 @@ QCommonPrintDialog::~QCommonPrintDialog() = default;
 
 void QCommonPrintDialog::init_backend()
 {
-    event_callback add_cb = (event_callback)CallbackFunctions::add_printer_callback;
-    event_callback rem_cb = (event_callback)CallbackFunctions::remove_printer_callback;
+    event_callback add_cb = reinterpret_cast<event_callback>(CallbackFunctions::add_printer_callback);
+    event_callback rem_cb = reinterpret_cast<event_callback>(CallbackFunctions::remove_printer_callback);
 
     uniqueID = QUuid::createUuid().toString().remove('{').remove('}');
     f = get_new_FrontendObj(uniqueID.toLatin1().data(), add_cb, rem_cb);
@@ -217,6 +217,8 @@ void QCommonPrintDialog::removePrinter(char *printer_name, char *printer_id, cha
     int i = destinationList.indexOf(QString("%1#%2").arg(printer_id).arg(backend_name));
     destinationList.removeAt(i);
     generalTab->destinationComboBox->removeItem(i);
+
+    (void)printer_name;
 }
 
 void QCommonPrintDialog::quit()
@@ -407,7 +409,7 @@ void QCommonPrintDialog::newColorModeSelected(int index)
     QString colorMode = generalTab->colorModeComboBox->itemText(index);
     if(colorMode == "")
         return;
-    add_setting_to_printer(p, "print-color-mode", colorMode.toLatin1().data());
+    add_setting_to_printer(p, const_cast<char*>("print-color-mode"), colorMode.toLatin1().data());
     if(colorMode.compare("color") == 0)
         preview->printer->setColorMode(QPrinter::Color);
     else if(colorMode.compare("monochrome") == 0)
@@ -422,7 +424,7 @@ void QCommonPrintDialog::newResolutionSelected(int index)
     QString resolution = optionsTab->resolutionComboBox->itemText(index);
     if(resolution == "")
         return;
-    add_setting_to_printer(p, "print-resolution", resolution.toLatin1().data());
+    add_setting_to_printer(p, const_cast<char*>("print-resolution"), resolution.toLatin1().data());
     int resolutionValue = resolution.replace("dpi", "").toInt();
     preview->printer->setResolution(resolutionValue);
     preview->update();
@@ -433,7 +435,7 @@ void QCommonPrintDialog::newDuplexOptionSelected(int index)
     QString duplexOption = pageSetupTab->bothSidesComboBox->itemText(index);
     if(duplexOption == "")
         return;
-    add_setting_to_printer(p, "sides", duplexOption.toLatin1().data());
+    add_setting_to_printer(p, const_cast<char*>("sides"), duplexOption.toLatin1().data());
     if(duplexOption.compare("one-sided") == 0)
         preview->printer->setDuplex(QPrinter::DuplexNone);
     else if(duplexOption.compare("two-sided-long-edge") == 0)
@@ -497,6 +499,8 @@ PageSetupTab::PageSetupTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Paper Source")), paperSourceComboBox);
 
     setLayout(layout);
+
+    (void)parent;
 }
 
 OptionsTab::OptionsTab(QWidget *parent)
@@ -525,6 +529,8 @@ OptionsTab::OptionsTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Finishings")), finishingsComboBox);
 
     setLayout(layout);
+
+    (void)parent;
 }
 
 JobsTab::JobsTab(QWidget *parent)
@@ -558,6 +564,8 @@ JobsTab::JobsTab(QWidget *parent)
     layout->addRow(new QLabel(tr("Job Sheets")), jobSheetsComboBox);
 
     setLayout(layout);
+
+    (void)parent;
 }
 
 Preview::Preview(QPrinter *_printer, QString uniqueID, QWidget *parent) :
