@@ -60,6 +60,11 @@ QCommonPrintDialog::QCommonPrintDialog(QWidget *parent) :
     layout->addItem(rightLayout);
     setLayout(layout);
 
+    QObject::connect(tabWidget,
+                    SIGNAL(currentChanged(int)),
+                    this,
+                    SLOT(tabChanged(int)));
+
     QObject::connect(cbf::Instance(),
                      SIGNAL(addPrinterSignal(char *, char *, char *)),
                      this,
@@ -167,6 +172,8 @@ void QCommonPrintDialog::printPreview(QPrinter *printer)
 void QCommonPrintDialog::refreshJobs()
 {
     QGridLayout *layout = jobsTab->jobsLayout;
+
+    /* Empty the layout */
     QLayoutItem *item;
     while((item = layout->takeAt(0))) {
         if(item->layout()){
@@ -178,6 +185,7 @@ void QCommonPrintDialog::refreshJobs()
         delete item;
     }
 
+    /* Table header */
     layout->addWidget(new QLabel(tr("Printer")), 0, 0);
     layout->addWidget(new QLabel(tr("Location")), 0, 1);
     layout->addWidget(new QLabel(tr("Status")), 0, 2);
@@ -190,8 +198,16 @@ void QCommonPrintDialog::refreshJobs()
     for (int i = 0; i < jobsCount; i++) {
         pObj = find_PrinterObj(f, job[i].printer_id, job[i].backend_name);
         layout->addWidget(new QLabel(job[i].printer_id), i+1, 0);
-        layout->addWidget(new QLabel(pObj->location), i+1, 1);
+        layout->addWidget(new QLabel(pObj->location[0] == '\0' ? "None" : pObj->location), i+1, 1);
         layout->addWidget(new QLabel(job[i].state), i+1, 2);
+    }
+}
+
+void QCommonPrintDialog::tabChanged(int index)
+{
+    if(tabWidget->tabText(index) == "Jobs") {
+        qDebug("Refreshing jobs list");
+        refreshJobs();
     }
 }
 
@@ -583,7 +599,9 @@ JobsTab::JobsTab(QWidget *parent)
     jobsWidget->setLayout(jobsLayout);
 
     scrollArea = new QScrollArea;
+    scrollArea->setMinimumHeight(240); // TODO: Remove hard-coded values
     scrollArea->setWidget(jobsWidget);
+    scrollArea->setWidgetResizable(true);
 
     refreshButton = new QPushButton("Refresh");
     startJobComboBox = new QComboBox;

@@ -144,6 +144,7 @@ private Q_SLOTS:
     void removePrinter(char *printer_name, char *printer_id, char *backend_name);
     void printJob();
     void quit();
+    void tabChanged(int index);
     void newPrinterSelected(int index);
     void remotePrintersCheckBoxStateChanged(int state);
     void collateCheckBoxStateChanged(int state);
